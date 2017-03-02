@@ -1,0 +1,43 @@
+
+import BankAPI from Bank;
+import CardReader from Machine;
+import PinReader from Machine;
+import CashDispenser from Machine;
+
+var accounts = BankAPI.users;
+var pin = [];
+var user = {};
+var userctrl = {};
+var balance = 0;
+var disp = 0;
+
+function MainMachine (){
+	print('Welcome Screen');
+	CardReader.onInsert(function(){
+		user = CardReader.user;
+		userctrl = accounts.findOne(user.userId).cardProfile;
+		if (user.key === userctrl.key){
+			pin = prompt('Please input your PIN code');
+			if(pin === userctrl.pin){
+				balance = userctrl.balance;
+				var disp = prompt('How much would you like to withdraw?');
+				if (disp > balance) {
+					CashDispenser.dispense(disp);
+					print('You have witdrawn'+disp+'£ of money.');
+					balance = balance - disp;
+					print('Your remaining balance is' + balance);
+					CardReader.eject;
+				} else {
+					print("You don't have sufficient funds");
+					CardReader.eject;
+				}
+			} else {
+				print('Incorrect PIN');
+				CardReader.eject;
+			}
+		} else {
+			Print('Your card cannot be processed');
+			CardReader.eject;
+		}
+	});
+};
